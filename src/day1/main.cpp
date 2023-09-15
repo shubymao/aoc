@@ -1,7 +1,10 @@
 #include <algorithm>
+#include <cstdint>
 #include <fstream>
+#include <functional>
 #include <iostream>
 #include <ostream>
+#include <queue>
 #include <string>
 
 bool isNumber(const std::string &buffer) {
@@ -18,23 +21,32 @@ bool isNumber(const std::string &buffer) {
   return true;
 }
 
+bool Compare(int64_t a, int64_t b) { return a > b; }
 int main() {
   std::ifstream inputFile("input.txt");
   std::string buffer;
-  int64_t maxSize = 0, maxIndex = -1, currentSize = 0, index = 0;
+  std::priority_queue<int64_t, std::vector<int64_t>,
+                      std::function<bool(int64_t, int64_t)>>
+      pq(Compare);
+  int64_t currentSize = 0;
   while (std::getline(inputFile, buffer)) {
     if (!isNumber(buffer)) {
-      if (maxSize < currentSize) {
-        maxIndex = index;
-        maxSize = currentSize;
+      pq.push(currentSize);
+      if (pq.size() > 3) {
+        pq.pop();
       }
-      index++;
       currentSize = 0;
     } else {
       /* std::cout << buffer << "\n"; */
       currentSize += std::stol(buffer);
     }
   }
-  std::cout << maxSize << "\n";
   inputFile.close();
+  int64_t total = 0;
+  while (pq.size()) {
+    std::cout << pq.top() << ", ";
+    total += pq.top();
+    pq.pop();
+  }
+  std::cout << "total: " << total << "\n";
 }
